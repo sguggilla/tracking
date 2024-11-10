@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courier Tracking Table with Multiple Selection</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+    
+    <!-- DataTables Buttons CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css">
+    
+    <!-- jQuery and DataTables JS -->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <style></style>
+</head>
+<body>
+    <div class="container my-4">
+        <h2 class="text-center">Courier Tracking</h2>
+        <button id="openFormButton" class="btn btn-primary mb-3">Add New Entry</button>
+        <button id="deleteSelected" class="btn btn-danger mb-3">Delete Selected</button>
+
+        <!-- Modal for Data Entry Form -->
+        <div id="entryModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Add New Courier Entry</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="entryForm">
+                            <div class="form-group">
+                                <label for="date">Date:</label>
+                                <input type="date" class="form-control" id="date" name="date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="customerName">Customer Name:</label>
+                                <input type="text" class="form-control" id="customerName" name="customerName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="customerMobile1">Customer Mobile1:</label>
+                                <input type="tel" class="form-control" id="customerMobile1" name="customerMobile1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="customerMobile2">Customer Mobile2:</label>
+                                <input type="tel" class="form-control" id="customerMobile2" name="customerMobile2">
+                            </div>
+                            <div class="form-group">
+                                <label for="amount">Amount:</label>
+                                <input type="number" class="form-control" id="amount" name="amount" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="address">Address:</label>
+                                <input type="text" class="form-control" id="address" name="address" required>
+                            </div>
+                            <button type="submit" class="btn btn-success">Add Entry</button>
+                            <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DataTable -->
+        <table id="courierTable" class="table table-striped" style="width:100%">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="selectAll"></th> <!-- Select All checkbox -->
+                    <th>Date</th>
+                    <th>Customer Name</th>
+                    <th>Customer Mobile1</th>
+                    <th>Customer Mobile2</th>
+                    <th>Amount</th>
+                    <th>Address</th>
+                    <th>Action</th> <!-- Edit Column -->
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="checkbox" class="selectRow"></td>
+                    <td>2024-10-15</td>
+                    <td>John Doe</td>
+                    <td>123-456-7890</td>
+                    <td>098-765-4321</td>
+                    <td>100.00</td>
+                    <td>123 Main St, New York, NY</td>
+                    <td><button class="btn btn-warning btn-sm edit-btn">Edit</button></td> <!-- Edit Button -->
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable
+            const table = $('#courierTable').DataTable({
+                "scrollY": "400px",
+                "scrollCollapse": true,
+                "paging": true
+            });
+
+            // Show the modal form for adding new entry
+            $('#openFormButton').on('click', function() {
+                $('#entryModal').modal('show');
+                $('#entryForm')[0].reset(); // Reset the form
+                $('#entryForm').data('edit', false); // Set form to add mode
+            });
+
+            // Handle form submission (Add or Edit)
+            $('#entryForm').on('submit', function(event) {
+                event.preventDefault();
+
+                // Get form data
+                const date = $('#date').val();
+                const customerName = $('#customerName').val();
+                const customerMobile1 = $('#customerMobile1').val();
+                const customerMobile2 = $('#customerMobile2').val();
+                const amount = $('#amount').val();
+                const address = $('#address').val();
+                
+                if ($(this).data('edit')) {
+                    // Edit mode: update the existing row
+                    const rowData = table.row($(this).data('row')).data();
+                    rowData[0] = date;
+                    rowData[1] = customerName;
+                    rowData[2] = customerMobile1;
+                    rowData[3] = customerMobile2;
+                    rowData[4] = amount;
+                    rowData[5] = address;
+                    table.row($(this).data('row')).data(rowData).draw();
+                } else {
+                    // Add mode: add a new row
+                    table.row.add([
+                        '<input type="checkbox" class="selectRow">',
+                        date,
+                        customerName,
+                        customerMobile1,
+                        customerMobile2,
+                        amount,
+                        address,
+                        '<button class="btn btn-warning btn-sm edit-btn">Edit</button>' // Edit button for new row
+                    ]).draw();
+                }
+
+                // Close modal and reset the form
+                $('#entryModal').modal('hide');
+                $('#entryForm')[0].reset();
+            });
+
+            // Edit button functionality
+            $('#courierTable').on('click', '.edit-btn', function() {
+                const row = table.row($(this).closest('tr'));
+                const rowData = row.data();
+
+                // Fill the form with the existing row data
+                $('#date').val(rowData[1]);
+                $('#customerName').val(rowData[2]);
+                $('#customerMobile1').val(rowData[3]);
+                $('#customerMobile2').val(rowData[4]);
+                $('#amount').val(rowData[5]);
+                $('#address').val(rowData[6]);
+
+                // Show modal and set form to edit mode
+                $('#entryModal').modal('show');
+                $('#entryForm').data('edit', true); // Set form to edit mode
+                $('#entryForm').data('row', row); // Store the row reference to edit
+
+                // Change modal title
+                $('.modal-title').text('Edit Courier Entry');
+            });
+
+            // Select/Deselect all rows
+            $('#selectAll').on('click', function() {
+                const isChecked = $(this).prop('checked');
+                $('#courierTable tbody .selectRow').prop('checked', isChecked);
+            });
+
+            // Delete selected rows
+            $('#deleteSelected').on('click', function() {
+                // Get selected rows
+                const selectedRows = $('#courierTable tbody .selectRow:checked');
+                
+                // Delete each selected row
+                selectedRows.each(function() {
+                    const row = $(this).closest('tr');
+                    table.row(row).remove().draw();
+                });
+            });
+        });
+    </script>
+</body>
+</html>

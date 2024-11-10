@@ -1,0 +1,44 @@
+/* Base font size for larger screens */
+body {
+    font-size: 16px;
+}
+
+/* For small devices (like phones), reduce font size */
+@media (max-width: 600px) {
+    body {
+        font-size: 14px; /* Smaller font size for small screens */
+    }
+}
+
+/* For medium devices (like tablets), adjust font size */
+@media (max-width: 768px) {
+    body {
+        font-size: 15px; /* Medium font size for tablets */
+    }
+}
+
+/* For large devices (like laptops), increase font size */
+@media (min-width: 1024px) {
+    body {
+        font-size: 18px; /* Larger font size for larger screens */
+    }
+}
+
+/* Specific font size for headings */
+h1 {
+    font-size: 2rem; /* Default for larger screens */
+}
+
+/* Adjust heading size for mobile */
+@media (max-width: 600px) {
+    h1 {
+        font-size: 1.5rem; /* Smaller heading for mobile */
+    }
+}
+
+/* Adjust heading size for tablets */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 1.75rem; /* Slightly larger heading for tablets */
+    }
+}
